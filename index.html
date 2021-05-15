@@ -2,12 +2,72 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>菜鸟教程(runoob.com)</title>
+<title>拖拽小demo</title>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+  .dragPage {
+    width: 100%;
+    height: 100vh;
+    background-color: antiquewhite;
+  }
+
+  .export-img-link {
+    display: none;
+  }
+</style>
 </head>
 <body>
+  <div class='dragPage' id='dragPage'>
+    <h1>我是拖拽页面</h1>
+    <h2>我是内容1</h2>
+    <h2>我是内容2</h2>
+    <h2>我是内容3</h2>
+    <h2>我是内容4</h2>
+    <h2>我是内容5</h2>
 
-<h1>我的第一个标题</h1>
-<p>我的第一个段落。</p>
+    <a
+      id="exportImgLink"
+      class="export-img-link"
+      :download="exportName + '.png'"
+    >
+      <img id="exportImg" class="export-img" alt="示范图" />
+    </a>
 
+    <button @click="getImage">生成图片</button>
+  </div>
+
+  <script>
+    const coupon = new Vue({
+      el: '#dragPage',
+      data: {
+        isLoading: true,
+        exportName: '示范图'
+      },
+      methods: {
+        getImage() {
+          html2canvas(document.querySelector('#dragPage'), {
+            scale: 2 //放大一倍，使图像清晰一点
+          }).then((canvas) => {
+            const exportImgEle = document.querySelector('#dragPage')
+            const exportImgLinkEle = document.querySelector('#exportImgLink')
+            exportImgEle.src = canvas.toDataURL('image/png')
+            exportImgLinkEle.href = canvas.toDataURL('image/png')
+            exportImgLinkEle.click() // 执行 <a> 元素的下载
+          })
+        }
+      },
+
+      mounted() {
+        console.log('我被加载啦')
+      }
+    })
+  </script>
 </body>
 </html>
+
