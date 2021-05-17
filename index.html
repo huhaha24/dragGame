@@ -1,73 +1,222 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<title>拖拽小demo</title>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+  <meta charset="utf-8">
+  <title>拖拽小demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-  }
-  .dragPage {
-    width: 100%;
-    height: 100vh;
-    background-color: antiquewhite;
-  }
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
 
-  .export-img-link {
-    display: none;
-  }
-</style>
+    img {
+      margin: 8px;
+      cursor: pointer;
+    }
+
+    .dragPage {
+      width: 100%;
+      height: 100vh;
+      background-color: antiquewhite;
+    }
+
+    /* 生成图片按钮 */
+    .button {
+      padding: 4px 12px;
+      background-color: #fffbf0;
+      border: 1px solid #d4d1d1;
+      border-radius: 2px;
+      color: #666;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    /* 放置区域 */
+    .content {
+      width: 500px;
+      height: 700px;
+      border-radius: 10px;
+      border: 1px solid #666;
+      margin: auto;
+      background-color: #f0f0f0;
+    }
+
+    .result {
+      position: absolute;
+      top: 10%;
+      left: 24px;
+      color: brown;
+    }
+
+    ul,
+    li {
+      list-style: none;
+      padding: 0px;
+      margin: 0px;
+    }
+
+    /* 内容行 */
+    .content__row__item {
+      width: 100%;
+      height: 180px;
+      border-bottom: 1px solid #222;
+    }
+
+    /* 可拖动的区域 */
+    .dragableBox {
+      position: absolute;
+      top: 20%;
+      right: 10px;
+      border-radius: 10px;
+      border: 1px solid #666;
+      background-color: #f0f0f0;
+      width: 300px;
+      height: 500px;
+    }
+
+    .export-img-link {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
   <div class='dragPage' id='dragPage'>
-    <h1>我是拖拽页面</h1>
-    <h2>我是内容1</h2>
-    <h2>我是内容2</h2>
-    <h2>我是内容3</h2>
-    <h2>我是内容4</h2>
-    <h2>我是内容5</h2>
+    <h1>放置区域</h1>
 
-    <a
-      id="exportImgLink"
-      class="export-img-link"
-      :download="exportName + '.png'"
-    >
-      <img id="exportImg" class="export-img" alt="示范图" />
+    <div class="result">{{ result }}</div>
+    <div class="content">
+      <ul class="content__row">
+        <li class="content__row__item" id="li1" @drop="drop" @dragover="allowDrop"></li>
+        <li class="content__row__item" id="li2" @drop="drop" @dragover="allowDrop"></li>
+        <li class="content__row__item"></li>
+      </ul>
+    </div>
+
+    <div class="dragableBox">
+      <el-tooltip content='香蕉'>
+        <img draggable="true" id='img1' style="width: 100px" :src="translateImage('./2.jpg')" @dragstart="drag" />
+      </el-tooltip>
+      <!-- <el-tooltip content='苹果'>
+        <img draggable="true" id='img2' style="width: 100px"
+          src='data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=' @dragstart="drag" />
+      </el-tooltip> -->
+    </div>
+
+    <a id="exportImgLink" class="export-img-link" :download="exportName + '.png'">
+      <img id="exportImg" class="export-img" alt="百科月报导出数据图" />
     </a>
 
-    <button @click="getImage">生成图片</button>
+    <button @click="getImage" class="button">生成图片</button>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
 
   <script>
     const coupon = new Vue({
       el: '#dragPage',
       data: {
         isLoading: true,
-        exportName: '示范图'
+        exportName: '示范图',
+        result: '',
+        scale: 3
       },
       methods: {
-        getImage() {
-          html2canvas(document.querySelector('#dragPage'), {
-            scale: 2 //放大一倍，使图像清晰一点
-          }).then((canvas) => {
-            const exportImgEle = document.querySelector('#dragPage')
+        // 截图
+        screenshot() {
+          const targetEle = document.querySelector('#dragPage')
+
+          // 获取页面的高度和宽度
+          const width = targetEle.offsetWidth
+          const height = targetEle.offsetHeight
+
+          // 创建一个canvas节点
+          const newCanvas = document.createElement('canvas')
+          const scale = this.scale // 放大倍数
+
+          newCanvas.width = width * scale
+          newCanvas.height = height * scale
+          newCanvas.getContext("2d").scale(scale, scale)
+
+          // html2canvas参数
+          const options = {
+            scale: scale,
+            canvas: newCanvas,
+            width: width,
+            height: height,
+            useCORS: true
+          }
+
+          this.result = '这是错误信息'
+
+          html2canvas(targetEle, options).then((canvas) => {
             const exportImgLinkEle = document.querySelector('#exportImgLink')
-            exportImgEle.src = canvas.toDataURL('image/png')
+            targetEle.src = canvas.toDataURL('image/png')
             exportImgLinkEle.href = canvas.toDataURL('image/png')
             exportImgLinkEle.click() // 执行 <a> 元素的下载
           })
+        },
+
+        /* 拖动相关内容 */
+        drag(ev) {
+          console.log('被拖动的东西', ev.target.id)
+          ev.dataTransfer.setData("text", ev.target.id)
+        },
+        allowDrop(ev) {
+          ev.preventDefault()
+        },
+        drop(ev) {
+          console.log('拖到的位置', ev.target.id)
+          if (ev.target.id === 'li2') {
+            this.result = '😯，你失败了'
+          } else {
+            this.result = '恭喜🎉'
+          }
+          ev.preventDefault()
+          var data = ev.dataTransfer.getData("text")
+          ev.target.appendChild(document.getElementById(data))
+        },
+
+        /* 生成图片 */
+        getImage() {
+          this.screenshot()
+        },
+
+        /* 将图片转换成base64 */
+        getBase64Image(img) {  
+          var canvas = document.createElement("canvas");  
+          canvas.width = img.width;  
+          canvas.height = img.height
+          var ctx = canvas.getContext("2d");  
+          ctx.drawImage(img, 0, 0, img.width, img.height);  
+          var dataURL = canvas.toDataURL("image/jpg");  
+          return dataURL
+        },
+
+        translateImage(url) {
+          var image = new Image() 
+          image.src = url
+          image.setAttribute("crossOrigin", 'Anonymous')
+          image.onload = () => {  
+            var base64 = this.getBase64Image(image) 
+            console.log(base64);
+            return base64
+          }
         }
       },
 
       mounted() {
-        console.log('我被加载啦')
+        // this.img1 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
       }
     })
   </script>
 </body>
-</html>
 
+</html>
