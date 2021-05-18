@@ -1,0 +1,202 @@
+    /* 重置样式 */
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    ul,
+    li {
+      list-style: none;
+      padding: 0px;
+      margin: 0px;
+    }
+
+    /* 背景区域 */
+    body {
+      background: url(./img_bg.png) no-repeat fixed top;
+      background-size: cover;
+    }
+
+    /* 冰箱 and 花花 */
+    .refrigerator {
+      position: absolute;
+      width: 620px;
+      top: 16%;
+      left: 4%;
+    }
+
+    .refrigerator_bg {
+      width: 100%;
+      position: relative;
+    }
+
+    .flower img {
+      width: 10%;
+      position: absolute;
+      bottom: 0;
+      left: 2%;
+    }
+
+    /* 放置区域 */
+    .area {
+      width: 226px;
+      left: 126px;
+      position: absolute;
+      /* background-color: rgba(0, 0, 0, 0.2); */
+      padding-left: 15px;
+      padding-top: 24px;
+    }
+
+    /* 冷藏区 */
+    .area_clod {
+      height: 200px;
+      top: 30px;
+    }
+
+    /* 变温区 */
+    .area_variable {
+      width: 216px;
+      height: 54px;
+      top: 273px;
+      padding-top: 65px;
+      padding-left: 24px;
+    }
+
+    /* 冷冻区 */
+    .area_frozen {
+      height: 52px;
+      top: 410px;
+      padding-top: 100px;
+      padding-left: 24px;
+      width: 216px;
+    }
+
+    /* 右边区域 */
+    .area_right {
+      width: 200px;
+      height: 208px;
+      top: 8px;
+      left: 380px;
+      padding-left: 30px;
+    }
+
+    /* 实时结果 */
+    .result {
+      position: absolute;
+      right: 4%;
+      top: 10%;
+    }
+    .result_text {
+      position: absolute;
+      left: 50%;
+      top: 27%;
+      transform: translateX(-50%);
+      color: rgba(84, 60, 29, 1);
+      max-height: 50px;
+      overflow-y: auto;
+    }
+    .result_text::-webkit-scrollbar {
+      width: 0 !important;
+    }
+    .result img {
+      width: 600px;
+      height: 200px;
+      position: relative;
+    }
+
+    /* 最终结果 */
+    .final_cold {
+      color: rgba(84, 60, 29, 1);
+    }
+
+    .error_item {
+      color: red;
+    }
+
+    /* 选择区域 */
+    .box {
+      width: 600px;
+      border-right: 10px solid #fff;
+      border-bottom: 10px solid #fff;
+      position: absolute;
+      bottom: 14%;
+      right: 4%;
+
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .box li {
+      width: 150px;
+      height: 90px;
+      float: left;
+      box-sizing: border-box;
+      border-top: 10px solid #fff;
+      border-left: 10px solid #fff;
+      background-color: rgba(246, 247, 247, 1);
+      text-align: center;
+    }
+
+    .img_item {
+      width: 80px !important;
+      cursor: pointer;
+    }
+
+    .area .img_item {
+      width: 56px !important;
+      margin-left: -24px;
+      margin-bottom: 14px;
+      cursor: unset;
+    }
+
+    .img_item_tip {
+      color: #999;
+      font-size: 0.6rem;
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      display: none;
+    }
+
+    .img_box {
+      position: relative;
+    }
+
+    .img_box:hover .img_item_tip {
+      display: inline-block;
+    }
+
+    /* 生成图片按钮 */
+    .imgBtn img {
+      width: 6%;
+      position: absolute;
+      bottom: 3%;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* 遮罩层 */
+    .mask {
+      /* background-color: rgba(205, 226, 226, 0.1); */
+      opacity: 0.8;
+    }
+
+    /**
+      以下是针对不同屏幕的自适应
+    */
+    @media screen and (min-width: 1600px) and (max-width: 1900px) {
+      .refrigerator {
+        top: 24%;
+      }
+    }
+
+    @media screen and (min-width: 1901px) {
+      .refrigerator {
+        top: 30%;
+      }
+    }
