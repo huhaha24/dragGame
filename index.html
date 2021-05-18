@@ -3,130 +3,215 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name=”viewport” content=”width=device-width, initial-scale=1″ />
+  <link rel="stylesheet" href="./style.css" type="text/css" />
   <title>拖拽小demo</title>
-  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
-
-    img {
-      margin: 8px;
-      cursor: pointer;
-    }
-
-    .dragPage {
-      width: 100%;
-      height: 100vh;
-      background-color: antiquewhite;
-    }
-
-    /* 生成图片按钮 */
-    .button {
-      padding: 4px 12px;
-      background-color: #fffbf0;
-      border: 1px solid #d4d1d1;
-      border-radius: 2px;
-      color: #666;
-      cursor: pointer;
-      position: absolute;
-      top: 0;
-      right: 0;
-    }
-
-    /* 放置区域 */
-    .content {
-      width: 500px;
-      height: 700px;
-      border-radius: 10px;
-      border: 1px solid #666;
-      margin: auto;
-      background-color: #f0f0f0;
-    }
-
-    .result {
-      position: absolute;
-      top: 10%;
-      left: 24px;
-      color: brown;
-    }
-
-    ul,
-    li {
-      list-style: none;
-      padding: 0px;
-      margin: 0px;
-    }
-
-    /* 内容行 */
-    .content__row__item {
-      width: 100%;
-      height: 180px;
-      border-bottom: 1px solid #222;
-    }
-
-    /* 可拖动的区域 */
-    .dragableBox {
-      position: absolute;
-      top: 20%;
-      right: 10px;
-      border-radius: 10px;
-      border: 1px solid #666;
-      background-color: #f0f0f0;
-      width: 300px;
-      height: 500px;
-    }
-
-    .export-img-link {
-      display: none;
-    }
-  </style>
+  <style></style>
 </head>
 
 <body>
   <div class='dragPage' id='dragPage'>
-    <h1>放置区域</h1>
+    <div class="dragPage__content">
+      <!-- 冰箱 and 花花 -->
+      <div class="left">
+        <div class="refrigerator">
+          <img class="refrigerator_bg" src='./images/img_freezer@2x.png'/>
 
-    <div class="result">{{ result }}</div>
-    <div class="content">
-      <ul class="content__row">
-        <li class="content__row__item" id="li1" @drop="drop" @dragover="allowDrop"></li>
-        <li class="content__row__item" id="li2" @drop="drop" @dragover="allowDrop"></li>
-        <li class="content__row__item"></li>
-      </ul>
+          <div :id="areaType.COLD"
+            class="area area_clod"
+            @drop="drop"
+            @dragover="allowDrop">
+          </div>
+          <div :id="areaType.VARIABLE" 
+            class="area area_variable"
+            :class="{ 'mask': variableList.length > 0 }"
+            @drop="drop"
+            @dragover="allowDrop"
+          ></div>
+          <div
+            :id="areaType.FROZEN"
+            class="area area_frozen"
+            :class="{ 'mask': frozenList.length > 0 }"
+            @drop="drop"
+            @dragover="allowDrop"
+          ></div>
+          
+          <!-- 右边冷藏区 -->
+          <div :id="areaType.RIGHT" class="area area_right" @drop="drop" @dragover="allowDrop"></div>
+        </div>
+        <div class="flower">
+          <img src='./images/img_flower@2x.png' />
+        </div>
+      </div>
+
+      <!-- 选择区域 -->
+      <div class="selectArea">
+        <!-- 最终结果 -->
+        <div class="final" :class="{ 'hidden': !showFinalResult }">
+          <div class="final_cold">
+            冷藏区放置：
+            <div v-for='(item, index) in coldList' style="display: inline-block;">
+              <span :class="{ 'error_item': !correctColdList.includes(item) }">
+                {{ item }}
+              </span>
+              <i v-if='index === coldList.length - 1'>。</i>
+              <i v-else>、</i>
+            </div>
+          </div>
+          <div class="final_cold">
+            变温区放置：
+            <div v-for='(item, index) in variableList' style="display: inline-block;">
+              <span :class="{ 'error_item': !correctVariableList.includes(item) }">
+                {{ item }}
+              </span>
+              <i v-if='index === variableList.length - 1'>。</i>
+              <i v-else>、</i>
+            </div>
+          </div>
+          <div class="final_cold">
+            冷冻区放置：
+            <div v-for='(item, index) in frozenList' style="display: inline-block;">
+              <span :class="{ 'error_item': !correctFrozenList.includes(item) }">
+                {{ item }}
+              </span>
+              <i v-if='index === frozenList.length - 1'>。</i>
+              <i v-else>、</i>
+            </div>
+          </div>
+        </div>
+        <!-- 实时结果 -->
+        <div class="result">
+          <img src='./images/img_dialoguebox@2x.png'/>
+          <div class="result_text" v-if="!showFinalResult">
+            <span v-if='draggedList.length === 0'>请把下面的食物拖动放置在冰箱的正确区域，不需要放进冰箱的留在原位即可。</span>
+            <span v-else-if='result.isTrue'>God，放置正确，{{ result.item }}应该放置在冰箱的{{ result.area }}。</span>
+            <span v-else>Sorry，你放置错误了，{{ result.item }}应该放置在冰箱的{{ result.area }}哦。</span>
+          </div>
+          <div class="result_text" v-else>
+            未放进冰箱：
+            <div v-for='(item, index) in notPlacedList' style="display: inline-block;">
+              <span :class="{ 'error_item': needPlacedList.includes(item) }">
+                {{ item }}
+              </span>
+              <i v-if='index === notPlacedList.length - 1'>。</i>
+              <i v-else>、</i>
+            </div>
+          </div>
+        </div>
+        <!-- 选择区域 -->
+        <div class="box">
+          <ul>
+            <li v-for="item in foodList" :key="item.id" class="img_box">
+              <img
+                class="img_item"
+                draggable="true"
+                :src="`./images/${item.name}@2x.png`"
+                :id="item.name"
+                @dragstart="drag"
+              />
+              <span class="img_item_tip">{{ item.name }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
     </div>
+    <!-- 生成图片按钮 -->
+    <div class="dragPage__btn">
+      <a id="exportImgLink" class="hidden" :download="exportName + '.png'">
+        <img id="exportImg" class="export-img" alt="截图"/>
+      </a>
 
-    <div class="dragableBox">
-      <el-tooltip content='香蕉'>
-        <img draggable="true" id='img1' style="width: 100px" :src="translateImage('./2.jpg')" @dragstart="drag" />
-      </el-tooltip>
-      <!-- <el-tooltip content='苹果'>
-        <img draggable="true" id='img2' style="width: 100px"
-          src='data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=' @dragstart="drag" />
-      </el-tooltip> -->
+      <div class="imgBtn">
+        <img src='./images/btn@2x.png' @click="getImage"/>
+      </div>
     </div>
-
-    <a id="exportImgLink" class="export-img-link" :download="exportName + '.png'">
-      <img id="exportImg" class="export-img" alt="百科月报导出数据图" />
-    </a>
-
-    <button @click="getImage" class="button">生成图片</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-  <script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+  <script type="text/javascript" src="./foodList.js"></script>
 
   <script>
     const coupon = new Vue({
       el: '#dragPage',
       data: {
         isLoading: true,
-        exportName: '示范图',
-        result: '',
-        scale: 3
+        /* 图片相关 */
+        exportName: '示范图', // 图片生成名称
+        scale: 3, // 图片放大倍数
+
+        /* 拖拽相关 */
+        foodList: FOOD_LIST,
+        areaType: AREA_TYPE,
+        curItem: '', // 当前被拖动的元素
+        draggedList: [], // 已经被拖动的元素
+
+        /* 拖拽结果 */
+        result: {
+          isTrue: true,
+          item: '',
+          area: ''
+        },
+        showFinalResult: false, // 展示最后结果
+
+        coldList: [], // 冷藏区内容
+        variableList: [], // 变温内容
+        frozenList: [], // 冷冻内容
+      },
+      computed: {
+        correctColdList() {
+          const list = []
+          this.foodList.forEach(item => {
+            if (item.area === this.areaType.COLD) {
+              list.push(item.name)
+            }
+          })
+
+          return list || []
+        },
+        correctVariableList() {
+          const list = []
+          this.foodList.forEach(item => {
+            if (item.area === this.areaType.VARIABLE) {
+              list.push(item.name)
+            }
+          })
+
+          return list || []
+        },
+        correctFrozenList() {
+          const list = []
+          this.foodList.forEach(item => {
+            if (item.area === this.areaType.FROZEN) {
+              list.push(item.name)
+            }
+          })
+
+          return list || []
+        },
+        // 需求放置的东西
+        needPlacedList() {
+          const list = []
+          this.foodList.forEach(item => {
+            const { COLD, VARIABLE, FROZEN } = this.areaType
+            if ([COLD, VARIABLE, FROZEN].includes(item.area)) {
+              list.push(item.name)
+            }
+          })
+
+          return list || []
+        },
+        // 最后没有放置的内容
+        notPlacedList() {
+          const list = []
+          this.foodList.forEach(item => {
+            if (!this.draggedList.includes(item.name)) {
+              list.push(item.name)
+            }
+          })
+
+          return list || []
+        }
       },
       methods: {
         // 截图
@@ -166,54 +251,119 @@
 
         /* 拖动相关内容 */
         drag(ev) {
-          console.log('被拖动的东西', ev.target.id)
+          this.curItem = ev.target.id
           ev.dataTransfer.setData("text", ev.target.id)
         },
         allowDrop(ev) {
           ev.preventDefault()
         },
         drop(ev) {
-          console.log('拖到的位置', ev.target.id)
-          if (ev.target.id === 'li2') {
-            this.result = '😯，你失败了'
-          } else {
-            this.result = '恭喜🎉'
-          }
           ev.preventDefault()
-          var data = ev.dataTransfer.getData("text")
-          ev.target.appendChild(document.getElementById(data))
+          this.draggedList.push(this.curItem)
+
+          const data = ev.dataTransfer.getData("text")
+          
+          const { COLD, VARIABLE, FROZEN, RIGHT } = this.areaType
+          const isMilk = this.curItem === '鲜牛奶' && ev.target.id === COLD
+          const isNeedInverted = [VARIABLE, FROZEN].includes(ev.target.id)
+          const MAX_NUMBER = 5
+
+          if (ev.target.id === VARIABLE && this.variableList.length > MAX_NUMBER) return
+          if (ev.target.id === FROZEN && this.frozenList.length > MAX_NUMBER) return
+
+          // 防止叠加 以及 鲜牛奶放在格子里
+          if (ev.target.className === 'img_item') {
+            if (isMilk) {
+              document.getElementById(RIGHT).appendChild(document.getElementById(data))
+            } else {
+              ev.target.parentNode.appendChild(document.getElementById(data))
+            }
+          } else {
+            if (isMilk) {
+              document.getElementById(RIGHT).appendChild(document.getElementById(data))
+            } else {
+              document.getElementById(ev.target.id === RIGHT && this.curItem !== '鲜牛奶' ? COLD : ev.target.id)
+              .appendChild(document.getElementById(data))
+            }
+          }
+
+          document.getElementById(this.curItem).draggable = false
+
+          // 检查放置是否正确
+          const target = this.foodList.find(item => item.name === this.curItem)
+          const isTrue = target.area === ev.target.id
+
+          this.result.isTrue = isTrue
+          this.result.item = this.curItem
+          this.result.area = target.area
+
+          // 存放放置结果
+          this.getResult(ev.target.id)
         },
+
+        /* 存放拖拽结果 */
+        getResult(area) {
+          switch (area) {
+            // 冷藏
+            case this.areaType.COLD:
+              this.coldList.push(this.curItem)
+              break
+            case this.areaType.RIGHT:
+              this.coldList.push(this.curItem)
+              break
+            // 变温
+            case this.areaType.VARIABLE:
+              this.variableList.push(this.curItem)
+              break
+            // 冷冻
+            case this.areaType.FROZEN:
+              this.frozenList.push(this.curItem)
+              break
+            default:
+              break
+          }
+        },
+
+        /* 变温区和冷冻区倒放 */
+        setInverted() {},
 
         /* 生成图片 */
         getImage() {
-          this.screenshot()
+          // this.screenshot()
+
+          // 生成结果
+          this.showFinalResult = true
+          // window.location.reload()
         },
 
         /* 将图片转换成base64 */
-        getBase64Image(img) {  
-          var canvas = document.createElement("canvas");  
-          canvas.width = img.width;  
+        getBase64Image(img) {
+          var canvas = document.createElement("canvas");
+          canvas.width = img.width;
           canvas.height = img.height
-          var ctx = canvas.getContext("2d");  
-          ctx.drawImage(img, 0, 0, img.width, img.height);  
-          var dataURL = canvas.toDataURL("image/jpg");  
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, img.width, img.height);
+          // var dataURL = canvas.toDataURL("image/jpg");  
+          const dataURL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
           return dataURL
         },
 
         translateImage(url) {
-          var image = new Image() 
+          var image = new Image()
           image.src = url
-          image.setAttribute("crossOrigin", 'Anonymous')
-          image.onload = () => {  
-            var base64 = this.getBase64Image(image) 
-            console.log(base64);
-            return base64
-          }
+          // image.setAttribute("crossOrigin", 'Anonymous')
+          // image.onload = () => {
+          //   var base64 = this.getBase64Image(image) 
+          //   console.log(base64);
+          //   return base64
+          // }
+
+          return this.getBase64Image(image)
         }
       },
 
       mounted() {
-        // this.img1 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
+        // console.log(FOOD_LIST)
       }
     })
   </script>
