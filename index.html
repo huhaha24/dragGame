@@ -100,7 +100,7 @@
           <!-- 选择区域 -->
           <div class="box" id='scorllBox'>
             <ul>
-              <li v-for="item in foodList" :key="item.id" class="img_box">
+              <li v-for="(item, index) in foodList" :key="item.id" class="img_box" :id="`li${index}`">
                 <img class="img_item" draggable="true" :src="`./${item.name}@2x.png`" :id="item.name"
                   @dragstart="drag" />
                 <span class="img_item_tip">{{ item.name }}</span>
@@ -227,6 +227,23 @@
         screenshot() {
           if (!this.showFinalResult) return
           const targetEle = document.querySelector('#dragPage')
+          const scorllBox = document.querySelector('#scorllBox')
+
+          // 获取当前屏幕尺寸
+          const pageWidth = document.querySelector("html").offsetWidth
+          const liNumber = pageWidth > 1600 ? 16 : 12
+          const total = 36
+
+          // 处理html2canvas中overflow失效问题
+          document.querySelector('#scorllBox').style.height = 360
+          if (scorllBox.scrollTop > 0) {
+            document.querySelector('#scorllBox').scrollTop = 0
+          }
+
+          // 隐藏后面的内容
+          for (i = liNumber; i < total; i++) {
+            document.querySelector(`#li${i}`).style.display = 'none'
+          }
 
           // 获取页面的高度和宽度
           const width = targetEle.offsetWidth
@@ -254,6 +271,11 @@
             targetEle.src = canvas.toDataURL('image/png')
             exportImgLinkEle.href = canvas.toDataURL('image/png')
             exportImgLinkEle.click() // 执行 <a> 元素的下载
+
+            // 下载完成后恢复原样
+            for (i = liNumber; i < total; i++) {
+              document.querySelector(`#li${i}`).style.display = 'unset'
+            }
           })
         },
 
