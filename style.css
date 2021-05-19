@@ -46,21 +46,27 @@
     .final {
       position: absolute;
       color: rgba(84, 60, 29, 1);
-      top: 16%;
+      top: 17%;
       left: 68%;
       width: 23%;
     }
 
     .final_cold {
-      margin-top: 30%;
+      height: 240px;
+      display: flex;
+      align-items: center;
     }
 
     .final_variable {
-      margin-top: 45%;
+      height: 155px;
+      display: flex;
+      align-items: center;
     }
 
     .final_frozen {
-      margin-top: 52%;
+      height: 168px;
+      display: flex;
+      align-items: center;
     }
 
     /* 放置区域 */
@@ -292,7 +298,9 @@
       }
 
       .final {
-        width: 50%;
+        top: 31%;
+        left: 52%;
+        width: 35%;
       }
 
       .flower img {
