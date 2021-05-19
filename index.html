@@ -30,33 +30,39 @@
         <!-- 最终结果 -->
         <div class="final" :class="{ 'hidden': !showFinalResult }">
           <div class="final_cold">
-            冷藏区放置：
-            <div v-for='(item, index) in coldList' style="display: inline-block;">
-              <span :class="{ 'error_item': !correctColdList.includes(item) }">
-                {{ item }}
+            <div>
+              冷藏区放置：
+              <span v-for='(item, index) in coldList'>
+                <span :class="{ 'error_item': !correctColdList.includes(item) }">
+                  {{ item }}
+                </span>
+                <i v-if='index === coldList.length - 1'>。</i>
+                <i v-else>、</i>
               </span>
-              <i v-if='index === coldList.length - 1'>。</i>
-              <i v-else>、</i>
             </div>
           </div>
           <div class="final_variable">
-            变温区放置：
-            <div v-for='(item, index) in variableList' style="display: inline-block;">
-              <span :class="{ 'error_item': !correctVariableList.includes(item) }">
-                {{ item }}
+            <div>
+              变温区放置：
+              <span v-for='(item, index) in variableList' style="display: inline-block;">
+                <span :class="{ 'error_item': !correctVariableList.includes(item) }">
+                  {{ item }}
+                </span>
+                <i v-if='index === variableList.length - 1'>。</i>
+                <i v-else>、</i>
               </span>
-              <i v-if='index === variableList.length - 1'>。</i>
-              <i v-else>、</i>
             </div>
           </div>
           <div class="final_frozen">
-            冷冻区放置：
-            <div v-for='(item, index) in frozenList' style="display: inline-block;">
-              <span :class="{ 'error_item': !correctFrozenList.includes(item) }">
-                {{ item }}
+            <div>
+              冷冻区放置：
+              <span v-for='(item, index) in frozenList' style="display: inline-block;">
+                <span :class="{ 'error_item': !correctFrozenList.includes(item) }">
+                  {{ item }}
+                </span>
+                <i v-if='index === frozenList.length - 1'>。</i>
+                <i v-else>、</i>
               </span>
-              <i v-if='index === frozenList.length - 1'>。</i>
-              <i v-else>、</i>
             </div>
           </div>
         </div>
@@ -75,7 +81,7 @@
               <span v-if='draggedList.length === 0'>请把下面的食物拖动放置在冰箱的正确区域，不需要放进冰箱的留在原位即可。</span>
               <span v-else-if='result.isTrue'>Good，放置正确，{{ result.item }}应该放置在冰箱的{{ result.area }}。</span>
               <span v-else-if='needPlacedList.includes(result.item)'>Sorry，你放置错误了，{{ result.item }}应该放置在冰箱的{{ result.area }}哦。</span>
-              <span v-else-if='canPlacedList.includes(result.item)'>{{ result.item }}可以放进冰箱哦。</span>
+              <span v-else-if='canPlacedList.includes(result.item)'>Sorry，你放置错误了，{{ result.item }}应该放置在冰箱的{{ result.area }}哦。</span>
               <span v-else>{{ result.item }}不应该放进冰箱哦。</span>
             </div>
             <div class="result_text" v-else>
@@ -265,28 +271,18 @@
 
           const data = ev.dataTransfer.getData("text")
 
-          const { COLD, VARIABLE, FROZEN, RIGHT } = this.areaType
-          const isMilk = this.curItem === '鲜牛奶' && ev.target.id === COLD
+          const { COLD, VARIABLE, FROZEN, RIGHT, CASUAL } = this.areaType
           const isNeedInverted = [VARIABLE, FROZEN].includes(ev.target.id)
           const MAX_NUMBER = 5
 
-          if (ev.target.id === COLD && this.coldList.length > 21) return
           if (ev.target.id === VARIABLE && this.variableList.length > MAX_NUMBER) return
           if (ev.target.id === FROZEN && this.frozenList.length > MAX_NUMBER) return
 
           // 防止叠加 以及 鲜牛奶放在格子里
           if (ev.target.className === 'img_item') {
-            if (isMilk) {
-              document.getElementById(RIGHT).appendChild(document.getElementById(data))
-            } else {
-              ev.target.parentNode.appendChild(document.getElementById(data))
-            }
+            ev.target.parentNode.appendChild(document.getElementById(data))
           } else {
-            if (isMilk) {
-              document.getElementById(RIGHT).appendChild(document.getElementById(data))
-            } else {
-              document.getElementById(ev.target.id === RIGHT && this.curItem !== '鲜牛奶' ? COLD : ev.target.id).appendChild(document.getElementById(data))
-            }
+            document.getElementById(ev.target.id).appendChild(document.getElementById(data))
           }
 
           document.getElementById(this.curItem).draggable = false
@@ -299,11 +295,15 @@
             isTrue = [COLD, RIGHT].includes(ev.target.id)
           }
 
-          console.log('isTrue', isTrue)
-
           this.result.isTrue = isTrue
           this.result.item = this.curItem
           this.result.area = target.area
+
+          // 判断是否为可放可不放的东西
+          if (target.area === CASUAL) {
+            this.result.isTrue = [COLD, RIGHT].includes(ev.target.id)
+            this.result.area = COLD
+          }
 
           // 存放放置结果
           this.getResult(ev.target.id)
