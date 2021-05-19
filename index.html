@@ -313,7 +313,7 @@
           const target = this.foodList.find(item => item.name === this.curItem)
           let isTrue = target.area === ev.target.id
 
-          if (target.area === COLD) {
+          if ([COLD, RIGHT].includes(target.area)) {
             isTrue = [COLD, RIGHT].includes(ev.target.id)
           }
 
