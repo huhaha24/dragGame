@@ -218,6 +218,7 @@
       methods: {
         // 截图
         screenshot() {
+          if (!this.showFinalResult) return
           const targetEle = document.querySelector('#dragPage')
 
           // 获取页面的高度和宽度
@@ -243,6 +244,7 @@
 
           html2canvas(targetEle, options).then((canvas) => {
             const exportImgLinkEle = document.querySelector('#exportImgLink')
+            console.log('canvas', canvas)
             targetEle.src = canvas.toDataURL('image/png')
             exportImgLinkEle.href = canvas.toDataURL('image/png')
             exportImgLinkEle.click() // 执行 <a> 元素的下载
@@ -332,41 +334,13 @@
 
         /* 生成图片 */
         getImage() {
-          // this.screenshot()
-
           // 生成结果
           this.showFinalResult = true
-        },
-
-        // /* 将图片转换成base64 */
-        // getBase64Image(img) {
-        //   var canvas = document.createElement("canvas");
-        //   canvas.width = img.width;
-        //   canvas.height = img.height
-        //   var ctx = canvas.getContext("2d");
-        //   ctx.drawImage(img, 0, 0, img.width, img.height);
-        //   // var dataURL = canvas.toDataURL("image/jpg");  
-        //   const dataURL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-        //   return dataURL
-        // },
-
-        // translateImage(url) {
-        //   var image = new Image()
-        //   image.src = url
-        //   // image.setAttribute("crossOrigin", 'Anonymous')
-        //   // image.onload = () => {
-        //   //   var base64 = this.getBase64Image(image) 
-        //   //   console.log(base64);
-        //   //   return base64
-        //   // }
-
-        //   return this.getBase64Image(image)
-        // }
+          this.screenshot()
+        }
       },
 
-      mounted() {
-        // console.log(FOOD_LIST)
-      }
+      mounted() {}
     })
   </script>
 </body>
