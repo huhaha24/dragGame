@@ -39,7 +39,7 @@
               <i v-else>、</i>
             </div>
           </div>
-          <div class="final_cold">
+          <div class="final_variable">
             变温区放置：
             <div v-for='(item, index) in variableList' style="display: inline-block;">
               <span :class="{ 'error_item': !correctVariableList.includes(item) }">
@@ -49,7 +49,7 @@
               <i v-else>、</i>
             </div>
           </div>
-          <div class="final_cold">
+          <div class="final_frozen">
             冷冻区放置：
             <div v-for='(item, index) in frozenList' style="display: inline-block;">
               <span :class="{ 'error_item': !correctFrozenList.includes(item) }">
@@ -70,7 +70,7 @@
         <div>
           <!-- 实时结果 -->
           <div class="result">
-            <img src='./img_dialoguebox@2x.png' />
+            <img src='./img_dialoguebox@2x.png' :class="{ 'display': showFinalResult }"/>
             <div class="result_text" v-if="!showFinalResult">
               <span v-if='draggedList.length === 0'>请把下面的食物拖动放置在冰箱的正确区域，不需要放进冰箱的留在原位即可。</span>
               <span v-else-if='result.isTrue'>Good，放置正确，{{ result.item }}应该放置在冰箱的{{ result.area }}。</span>
@@ -92,7 +92,7 @@
             </div>
           </div>
           <!-- 选择区域 -->
-          <div class="box">
+          <div class="box" id='scorllBox'>
             <ul>
               <li v-for="item in foodList" :key="item.id" class="img_box">
                 <img class="img_item" draggable="true" :src="`./${item.name}@2x.png`" :id="item.name"
@@ -112,6 +112,7 @@
       </a>
 
       <div class="imgBtn">
+        <img style="left: 42%;" src='./result.png' @click="showFinalResult = true" />
         <img src='./btn@2x.png' @click="getImage" />
       </div>
     </div>
@@ -244,7 +245,6 @@
 
           html2canvas(targetEle, options).then((canvas) => {
             const exportImgLinkEle = document.querySelector('#exportImgLink')
-            console.log('canvas', canvas)
             targetEle.src = canvas.toDataURL('image/png')
             exportImgLinkEle.href = canvas.toDataURL('image/png')
             exportImgLinkEle.click() // 执行 <a> 元素的下载
@@ -334,8 +334,6 @@
 
         /* 生成图片 */
         getImage() {
-          // 生成结果
-          this.showFinalResult = true
           this.screenshot()
         }
       },
